@@ -1,0 +1,9 @@
+{
+  "development": {
+    "username": "postgres",
+    "password": "root",
+    "database": "booking-system",
+    "host": "localhost",
+    "dialect": "postgres"
+  }
+}
