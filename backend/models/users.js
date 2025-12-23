@@ -1,20 +1,36 @@
-import jwt from "jsonwebtoken";
+'use strict';
 
+module.exports = (sequelize, DataTypes) => {
+  const User = sequelize.define(
+    'User',
+    {
+      name: {
+        type: DataTypes.STRING,
+        allowNull: false,
+      },
 
-export const authenticateToken = (req, res, next) => {
-    const token = req.header("Authorization");
+      email: {
+        type: DataTypes.STRING,
+        allowNull: false,
+        unique: true,
+        validate: {
+          isEmail: true,
+        },
+      },
 
-    if (!token) {
-        res.status(401).json({ status: 401, message: "Access Denied. No Token Provided." });
-        return;
+      password: {
+        type: DataTypes.STRING,
+        allowNull: false,
+      },
+    },
+    {
+      tableName: 'users',
+      timestamps: true,
     }
+  );
 
-    try {
-        const decoded = jwt.verify(token, "your_secret_key");
-        req.user = decoded;
-        next(); 
-    } catch (error) {
-        res.status(403).json({ status: 403, message: "Invalid Token" });
-    }
+  User.associate = (models) => {
+  };
+
+  return User;
 };
-
