@@ -1,8 +1,9 @@
-import jwt from "jsonwebtoken";
+const  jwt = require("jsonwebtoken");
+const dotenv = require('dotenv');
 
 dotenv.config();
 
-export const authenticateToken = (req, res, next) => {
+const authenticateToken = (req, res, next) => {
     const token = req.header("Authorization");
 
     if (!token) {
@@ -17,4 +18,10 @@ export const authenticateToken = (req, res, next) => {
     } catch (error) {
         res.status(403).json({ status: 403, message: "Invalid Token" });
     }
+};
+
+
+
+module.exports = {
+    authenticateToken
 };

@@ -1,36 +1,30 @@
 'use strict';
 
 module.exports = (sequelize, DataTypes) => {
-  const User = sequelize.define(
-    'User',
-    {
-      name: {
-        type: DataTypes.STRING,
-        allowNull: false,
-      },
-
-      email: {
-        type: DataTypes.STRING,
-        allowNull: false,
-        unique: true,
-        validate: {
-          isEmail: true,
-        },
-      },
-
-      password: {
-        type: DataTypes.STRING,
-        allowNull: false,
-      },
+  const User = sequelize.define('User', {
+    id: {
+      type: DataTypes.INTEGER,
+      primaryKey: true,
+      autoIncrement: true
     },
-    {
-      tableName: 'users',
-      timestamps: true,
+    name: {
+      type: DataTypes.STRING,
+      allowNull: false
+    },
+    email: {
+      type: DataTypes.STRING,
+      allowNull: false,
+      unique: true
+    },
+    password: {
+      type: DataTypes.STRING,
+      allowNull: false
     }
-  );
-
-  User.associate = (models) => {
-  };
+  }, {
+    tableName: 'users',
+    schema: "public", 
+    timestamps: true 
+  });
 
   return User;
 };
