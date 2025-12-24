@@ -48,6 +48,7 @@ const login = async (req, res) => {
         id: user.id,
         name: user.name,
         email: user.email,
+        role: user.role
     });
 
   } catch (error) {
@@ -58,9 +59,9 @@ const login = async (req, res) => {
 
 const register = async (req, res) => {
   try {
-    const { name, email, password } = req.body;
+    const { name, email, password, role } = req.body;
 
-    if (!name || !email || !password) {
+    if (!name || !email || !password || !role) {
       return res.status(400).json({
         success: false,
         message: "All fields are required",
@@ -82,12 +83,14 @@ const register = async (req, res) => {
       name,
       email,
       password: hashedPassword,
+      role,
     });
 
     return res.status(201).json({
         id: user.id,
         name: user.name,
         email: user.email,
+        role: user.role
     });
 
   } catch (error) {
@@ -97,5 +100,3 @@ const register = async (req, res) => {
 
 
 module.exports = { login, register };
-
-

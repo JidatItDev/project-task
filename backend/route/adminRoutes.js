@@ -2,6 +2,7 @@ const  { login, register } = require('../controller/authController');
 const express = require('express');
 const dotenv = require('dotenv');
 const { getAllBookings, updateBookingStatus, deleteBooking } = require('../controller/bookingController');
+const  { authenticateToken } = require('../middleware/authMiddleware');
 
 
 dotenv.config();
@@ -14,9 +15,9 @@ module.exports = (app) => {
 
   app.post("/register", register);
 
-  app.get('/admin/getAllBookings', getAllBookings);
+  app.get('/admin/getAllBookings', authenticateToken, getAllBookings);
 
-  app.put('/admin/updateBookingStatus/:id', updateBookingStatus);
+  app.put('/admin/updateBookingStatus/:id', authenticateToken, updateBookingStatus);
 
-  app.delete('/admin/deleteBooking/:id', deleteBooking);
+  app.delete('/admin/deleteBooking/:id', authenticateToken, deleteBooking);
 };
