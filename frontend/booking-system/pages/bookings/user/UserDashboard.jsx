@@ -8,12 +8,20 @@ const UserDashboard = () => {
   const [loading, setLoading] = useState(true);
 
   const user = JSON.parse(localStorage.getItem("user"));
-  const userId = user?.userId;
+  console.log("User data from localStorage:", user); 
+  const userId = user?.id;
+  console.log("User ID from localStorage:", userId); 
 
   useEffect(() => {
+    if (!userId) {
+      console.log("No userId found, cannot fetch bookings.");
+      return;
+    }
+
     const fetchBookings = async () => {
       try {
         const res = await getUserBookings(userId);
+        console.log("Bookings data:", res.data); 
         setBookings(res.data);
       } catch (error) {
         console.error("Failed to fetch bookings", error);
@@ -22,14 +30,23 @@ const UserDashboard = () => {
       }
     };
 
-    if (userId) fetchBookings();
+    fetchBookings();
   }, [userId]);
+
+  if (!userId) {
+    return (
+      <div>
+        <p>Error: User is not logged in. Please log in again.</p>
+        <Link to="/login">Go to Login</Link>
+      </div>
+    );
+  }
 
   return (
     <div className="user-container">
       <div className="user-header">
         <h2>My Bookings</h2>
-        <Link to="/user/create-booking" className="btn">
+        <Link to="/user/createBooking" className="btn">
           + Add Booking
         </Link>
       </div>

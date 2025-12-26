@@ -15,6 +15,8 @@ const createBooking = async (req, res) => {
         missingFields: missingFields.join(", ")
       });
     }
+    
+    // validating right time:
 
     if (new Date(startTime) >= new Date(endTime)) {
       return res.status(400).json({
@@ -23,7 +25,7 @@ const createBooking = async (req, res) => {
       });
     }
 
-    // prevent same slot booking 
+    //preventing same slot booking 
     const sameSlot = await Booking.findOne({
       where: {
         startTime,
@@ -38,6 +40,7 @@ const createBooking = async (req, res) => {
       });
     }
 
+    //checking the booked time slot:
     const conflict = await Booking.findOne({
       where: {
         status: 'accepted',

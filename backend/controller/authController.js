@@ -18,7 +18,7 @@ const login = async (req, res) => {
         message: "All fields are required",
       });
     }
-
+    //check existing user
     const user = await User.findOne({ where: { email } });
 
     if (!user) {
@@ -36,7 +36,7 @@ const login = async (req, res) => {
         message: "Invalid email or password",
       });
     }
-
+    //generate token for the user
     const token = jwt.sign(
       { id: user.id, email: user.email },
       process.env.JWT_SECRET,
@@ -67,7 +67,7 @@ const register = async (req, res) => {
         message: "All fields are required",
       });
     }
-
+    //check existing user
     const existingUser = await User.findOne({ where: { email } });
 
     if (existingUser) {
@@ -76,9 +76,9 @@ const register = async (req, res) => {
         message: "User already exists with this email",
       });
     }
-
+    //hashing the password
     const hashedPassword = await bcrypt.hash(password, 10);
-
+    //registering the new user
     const user = await User.create({
       name,
       email,
@@ -94,9 +94,19 @@ const register = async (req, res) => {
     });
 
   } catch (error) {
-    handleError(res, error, 500, "Registration failed");
+    handleError(res, error);
   }
 };
 
+const getAllUsers = async(req, res)=> {
+  try{
+    const getUsers = await User.findAll();
 
-module.exports = { login, register };
+    return res.status(200).send(getUsers);
+  }catch(err){
+      handleError(res, error);
+  }
+}
+
+
+module.exports = { login, register, getAllUsers };

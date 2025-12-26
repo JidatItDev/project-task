@@ -1,4 +1,4 @@
-const  { login, register } = require('../controller/authController');
+const  { login, register, getAllUsers } = require('../controller/authController');
 const express = require('express');
 const dotenv = require('dotenv');
 const { getAllBookings, updateBookingStatus, deleteBooking } = require('../controller/bookingController');
@@ -14,6 +14,8 @@ module.exports = (app) => {
   app.post("/login", login);
 
   app.post("/register", register);
+
+  app.get('/admin/getAllUsers', getAllUsers);
 
   app.get('/admin/getAllBookings', authenticateToken, getAllBookings);
 

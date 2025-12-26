@@ -70,3 +70,102 @@
 .error {
   color: red;
 }
+
+/* admin-dashboard.css */
+.admin-dashboard {
+  display: flex;
+}
+
+.sidebar {
+  width: 250px;
+  background-color: #f4f4f4;
+  padding: 10px;
+}
+
+.user-list {
+  margin-top: 20px;
+}
+
+.user-item {
+  cursor: pointer;
+  margin-bottom: 10px;
+  padding: 10px;
+  background-color: #fff;
+  border-radius: 5px;
+  transition: background-color 0.3s;
+}
+
+.user-item:hover {
+  background-color: #ddd;
+}
+
+.main-content {
+  flex: 1;
+  padding: 20px;
+}
+
+.status-yellow {
+  background-color: yellow !important;
+}
+
+.status-green {
+  background-color: green !important;
+}
+
+.status-red {
+  background-color: red !important;
+}
+
+.admin-sidebar {
+  width: 240px;
+  min-height: 100vh;
+  background: #111827;
+  color: #fff;
+  padding: 20px;
+}
+
+.admin-sidebar-title {
+  font-size: 22px;
+  font-weight: 800;
+  margin-bottom: 30px;
+  text-align: center;
+}
+
+.admin-sidebar-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.admin-sidebar-link {
+  color: #d1d5db;
+  text-decoration: none;
+  padding: 10px 12px;
+  border-radius: 6px;
+  font-size: 15px;
+  transition: background 0.2s, color 0.2s;
+}
+
+.admin-sidebar-link:hover {
+  background: #1f2937;
+  color: #fff;
+}
+
+
+
+.admin-layout {
+  display: flex;
+}
+
+.admin-content {
+  flex: 1;
+  background: #f9fafb;
+  min-height: 100vh;
+}
+
+.admin-title {
+  font-size: 26px;
+  font-weight: 800;
+  color: #111827;
+  margin-bottom: 16px;
+}

@@ -20,7 +20,7 @@ const CreateBooking = () => {
 
     try {
       await createBooking({
-        userId: user.userId,
+        userId: user.id,
         startTime,
         endTime,
         notes,
@@ -33,6 +33,8 @@ const CreateBooking = () => {
       setLoading(false);
     }
   };
+
+  console.log("from creatingbooking")
 
   return (
     <div className="user-container">

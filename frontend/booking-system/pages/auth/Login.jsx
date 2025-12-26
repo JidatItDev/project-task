@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
-import { Link } from "react-router-dom";
-
+import { Link, useNavigate } from "react-router-dom";  
 
 const Login = () => {
   const [email, setEmail] = useState("");
@@ -10,6 +9,8 @@ const Login = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
+
+  const navigate = useNavigate();
 
   useEffect(() => {
     console.log("Login page mounted");
@@ -28,18 +29,31 @@ const Login = () => {
       });
 
       console.log("Login response:", response.data);
+      console.log(localStorage.getItem('user'));
+
 
       if (response.data.token) {
-        localStorage.setItem("user", JSON.stringify({ userId: "123", email: "a@b.com" }));
-      }
+        // Save user data in localStorage
+        localStorage.setItem("user", JSON.stringify({
+          token: response.data.token,
+          id: response.data.id,   
+          email: response.data.email,      
+          role: response.data.role,
+        }));
 
-      setSuccess("Login successful");
+        setSuccess("Login successful");
+        console.log("token here:", localStorage.getItem('user'));
+
+        //redirect to the users dashboard based on their role
+        if (response.data.role === "user") {
+          navigate("/user/dashboard");
+        } else if (response.data.role === "admin") {
+          navigate("/admin/dashboard");
+        }
+      }
     } catch (err) {
       console.error(err);
-
-      setError(
-        err.response?.data?.message || "Login failed. Try again."
-      );
+      setError(err.response?.data?.message || "Login failed. Try again.");
     } finally {
       setLoading(false);
     }
@@ -79,7 +93,6 @@ const Login = () => {
           Go to Register
         </Link>
       </p>
-
 
       {error && <p style={styles.error}>{error}</p>}
       {success && <p style={styles.success}>{success}</p>}
