@@ -1,8 +1,7 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import AdminBookingsCalendar from "../../../components/layout/AdminBookingsCalendar";
 import { adminGetAllBookings } from "../../services/booking.service";
-
 
 const AdminBookingsCalendarPage = () => {
   const [bookings, setBookings] = useState([]);
@@ -48,7 +47,7 @@ const AdminBookingsCalendarPage = () => {
           Go to List
         </button>
       </div>
-    
+
       {error && <p style={{ color: "red" }}>{error}</p>}
 
       <AdminBookingsCalendar
@@ -56,14 +55,14 @@ const AdminBookingsCalendarPage = () => {
         onDateSelect={(yyyyMmDd) => {
           navigate(`/admin/bookings?date=${encodeURIComponent(yyyyMmDd)}`);
         }}
-        onEventSelect={(booking) => {
-          const start = booking.startTime || booking.start || booking.date;
-          const day = start ? String(start).slice(0, 10) : "";
-          navigate(`/admin/bookings${day ? `?date=${encodeURIComponent(day)}` : ""}`);
-        }}
+        // onEventSelect={(booking) => {
+        //   const start = booking.startTime || booking.start || booking.date;
+        //   const day = start ? String(start).slice(0, 10) : "";
+        //   navigate(`/admin/bookings${day ? `?date=${encodeURIComponent(day)}` : ""}`);
+        // }}
       />
     </div>
   );
-};
+};  
 
 export default AdminBookingsCalendarPage;

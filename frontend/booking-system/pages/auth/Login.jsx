@@ -1,15 +1,16 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
-import { Link, useNavigate } from "react-router-dom";  
+import { Link, useNavigate } from "react-router-dom";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
-
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -29,27 +30,27 @@ const Login = () => {
       });
 
       console.log("Login response:", response.data);
-      console.log(localStorage.getItem('user'));
-
 
       if (response.data.token) {
         // Save user data in localStorage
         localStorage.setItem("user", JSON.stringify({
           token: response.data.token,
-          id: response.data.id,   
-          email: response.data.email,      
+          id: response.data.id,
+          email: response.data.email,
           role: response.data.role,
         }));
 
         setSuccess("Login successful");
         console.log("token here:", localStorage.getItem('user'));
 
-        //redirect to the users dashboard based on their role
-        if (response.data.role === "user") {
-          navigate("/user/dashboard");
-        } else if (response.data.role === "admin") {
-          navigate("/admin/dashboard");
-        }
+        // Redirect to the user's dashboard based on their role
+        setTimeout(() => {
+          if (response.data.role === "user") {
+            navigate("/user/dashboard");
+          } else if (response.data.role === "admin") {
+            navigate("/admin/dashboard");
+          }
+        }, 1500);
       }
     } catch (err) {
       console.error(err);
@@ -60,76 +61,95 @@ const Login = () => {
   };
 
   return (
-    <div style={styles.container}>
-      <h2>Login</h2>
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-50 to-gray-100 p-4">
+      <div className="w-full max-w-md mx-auto">
+        <div className="bg-white rounded-2xl shadow-xl p-8 border border-gray-100">
+          <div className="text-center mb-8">
+            <h1 className="text-3xl font-bold text-gray-900">Welcome Back</h1>
+            <p className="text-gray-600 mt-2">Sign in to your account</p>
+          </div>
 
-      <form onSubmit={handleLogin} style={styles.form}>
-        <input
-          type="email"
-          placeholder="Email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          required
-          style={styles.input}
-        />
+          <form onSubmit={handleLogin} className="space-y-6">
+            {/* Email Input */}
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-gray-700">Email</label>
+              <Input
+                type="email"
+                placeholder="you@example.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+                className="w-full h-11"
+              />
+            </div>
 
-        <input
-          type="password"
-          placeholder="Password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          required
-          style={styles.input}
-        />
+            {/* Password Input */}
+            <div className="space-y-2">
+              <div className="flex justify-between items-center">
+                <label className="text-sm font-medium text-gray-700">Password</label>
+               
+              </div>
+              <Input
+                type="password"
+                placeholder="••••••••"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                className="w-full h-11"
+              />
+            </div>
 
-        <button type="submit" disabled={loading} style={styles.button}>
-          {loading ? "Logging in..." : "Login"}
-        </button>
-      </form>
+            {/* Submit Button */}
+            <Button
+              type="submit"
+              disabled={loading}
+              className="w-full h-11 text-base font-medium bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white shadow-md hover:shadow-lg transition-all duration-200"
+            >
+              {loading ? (
+                <span className="flex items-center justify-center">
+                  <svg className="animate-spin h-5 w-5 mr-3 text-white" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none"/>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
+                  </svg>
+                  Logging in...
+                </span>
+              ) : (
+                "Sign In"
+              )}
+            </Button>
+          </form>
 
-      <p style={{ marginTop: "12px", textAlign: "center" }}>
-        Not Registered Yet?{" "}
-        <Link to="/register" style={{ color: "#007bff", textDecoration: "none" }}>
-          Go to Register
-        </Link>
-      </p>
+          {/* Error and Success Alerts */}
+          {error && (
+            <Alert variant="destructive" className="mt-6 animate-fade-in">
+              <AlertDescription className="font-medium">{error}</AlertDescription>
+            </Alert>
+          )}
 
-      {error && <p style={styles.error}>{error}</p>}
-      {success && <p style={styles.success}>{success}</p>}
+          {success && (
+            <Alert className="mt-6 bg-green-50 border-green-200 animate-fade-in">
+              <AlertDescription className="font-medium text-green-800">
+                {success} - Redirecting...
+              </AlertDescription>
+            </Alert>
+          )}
+
+          {/* Divider */}
+          <div className="mt-8 pt-6 border-t border-gray-200">
+            <p className="text-center text-gray-600">
+              Don't have an account?{" "}
+              <Link 
+                to="/register" 
+                className="font-semibold text-blue-600 hover:text-blue-800 hover:underline transition-colors"
+              >
+                Create account
+              </Link>
+            </p>
+          </div>
+        </div>
+      </div>
     </div>
   );
 };
 
 export default Login;
-
-const styles = {
-  container: {
-    maxWidth: "400px",
-    margin: "80px auto",
-    padding: "20px",
-    border: "1px solid #ccc",
-    borderRadius: "8px",
-  },
-  form: {
-    display: "flex",
-    flexDirection: "column",
-    gap: "12px",
-  },
-  input: {
-    padding: "10px",
-    fontSize: "16px",
-  },
-  button: {
-    padding: "10px",
-    fontSize: "16px",
-    cursor: "pointer",
-  },
-  error: {
-    color: "red",
-    marginTop: "10px",
-  },
-  success: {
-    color: "green",
-    marginTop: "10px",
-  },
-};

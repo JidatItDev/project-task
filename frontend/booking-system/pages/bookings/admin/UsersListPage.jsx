@@ -1,18 +1,23 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
-import { adminGetAllUsers } from "../../services/booking.service"; 
+import { Button } from "@/components/ui/button"; // ShadCN Button
+import { Alert, AlertDescription } from "@/components/ui/alert"; // ShadCN Alert
+import { Table, TableHeader, TableBody, TableRow, TableCell } from "@/components/ui/table"; // ShadCN Table
+import { adminGetAllUsers } from "../../services/booking.service"; // Your service for getting users
+import { useNavigate } from "react-router-dom"; // To navigate back to dashboard
 
 const UsersListPage = () => {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const navigate = useNavigate(); // Hook to navigate
 
+  // Fetch users from the API
   const fetchUsers = async () => {
     setError("");
     setLoading(true);
     try {
-      const res = await adminGetAllUsers(); 
-      setUsers(res.data); 
+      const res = await adminGetAllUsers();
+      setUsers(res.data);
     } catch (e) {
       console.error(e);
       setError(e.response?.data?.message || "Failed to load users");
@@ -28,44 +33,64 @@ const UsersListPage = () => {
   if (loading) return <p style={{ padding: 16 }}>Loading users…</p>;
 
   return (
-    <div style={{ padding: 16 }}>
-      <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 12 }}>
-        <h2 style={{ margin: 0 }}>Users List</h2>
-        <button onClick={fetchUsers} style={{ padding: "8px 12px", cursor: "pointer" }}>
+    <div className="p-8">
+      {/* Back Button */}
+      <Button
+        onClick={() => navigate("/admin/dashboard")}
+        variant="outline"
+        className="mb-6 h-10 px-6 text-sm font-medium text-gray-700 border border-gray-300 hover:bg-gray-100"
+      >
+        Back to Dashboard
+      </Button>
+
+      {/* Header Section */}
+      <div className="flex items-center gap-4 mb-6">
+        <h2 className="text-2xl font-semibold text-gray-900">Users List</h2>
+        
+        {/* Refresh Button */}
+        <Button
+          onClick={fetchUsers}
+          variant="outline"
+          className="h-10 px-6 text-sm font-medium text-blue-600 border border-blue-600 hover:bg-blue-50"
+        >
           Refresh
-        </button>
+        </Button>
       </div>
 
-      {error && <p style={{ color: "red" }}>{error}</p>}
+      {/* Error Alert */}
+      {error && (
+        <Alert variant="destructive" className="mb-6">
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
+      )}
 
+      {/* No Users Found */}
       {users.length === 0 ? (
         <p>No users found.</p>
       ) : (
-        <div style={{ overflowX: "auto" }}>
-          <table style={{ width: "100%", borderCollapse: "collapse" }}>
-            <thead>
-              <tr>
-                <th style={th}>ID</th>
-                <th style={th}>Name</th>
-                <th style={th}>Email</th>
-                <th style={th}>Role</th>
-              </tr>
-            </thead>
-            <tbody>
-              {users.map((user) => {
-                return (
-                  <tr key={user.id} style={{ borderTop: "1px solid #eee" }}>
-                    <td style={td}>{user.id}</td>
-                    <td style={td}>{user.name}</td>
-                    <td style={td}>{user.email}</td>
-                    <td style={td}>{user.role}</td>
-                    <td style={td}>
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
+        <div className="overflow-x-auto rounded-lg border border-gray-200 shadow-lg mx-auto max-w-7xl">
+          <Table>
+            <TableHeader>
+              <TableRow className="bg-gray-100">
+                <TableCell className="font-semibold text-gray-700">#</TableCell>
+                <TableCell className="font-semibold text-gray-700">ID</TableCell>
+                <TableCell className="font-semibold text-gray-700">Name</TableCell>
+                <TableCell className="font-semibold text-gray-700">Email</TableCell>
+                <TableCell className="font-semibold text-gray-700">Role</TableCell>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {users.map((user, index) => (
+                <TableRow key={user._id} className="hover:bg-gray-50 border-t border-gray-200">
+                  <TableCell>{index + 1}</TableCell> {/* Indexing column */}
+                  <TableCell>{user._id}</TableCell>
+                  <TableCell>{user.name}</TableCell>
+                  <TableCell>{user.email}</TableCell>
+                  <TableCell>{user.role}</TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
         </div>
       )}
     </div>
@@ -73,16 +98,3 @@ const UsersListPage = () => {
 };
 
 export default UsersListPage;
-
-const th = {
-  textAlign: "left",
-  padding: "10px 8px",
-  background: "#f6f6f6",
-  borderBottom: "1px solid #e6e6e6",
-  fontWeight: 600,
-};
-
-const td = {
-  padding: "10px 8px",
-  verticalAlign: "top",
-};
