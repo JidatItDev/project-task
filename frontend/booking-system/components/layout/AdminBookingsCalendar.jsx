@@ -95,6 +95,8 @@ const AdminBookingsCalendar = ({ bookings = [], onDateSelect, onEventSelect }) =
     );
   };
 
+  
+
   return (
     <div style={{ 
       background: "#fff", 
