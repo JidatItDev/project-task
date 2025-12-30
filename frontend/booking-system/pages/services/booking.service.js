@@ -10,7 +10,7 @@ const getToken = () => {
 export const getUserBookings = (userId) => {
   const token = getToken(); 
 
-  return axios.get(`${API_URL}/user/getBookingsByUserId/${userId}`, {
+  return axios.get(`${API_URL}/user/getBookingsByUserId2/${userId}`, {
     headers: {
       Authorization: `Bearer ${token}`,
     },
@@ -42,6 +42,15 @@ export const adminGetAllBookings = () => {
 export const adminGetAllUsers = () => {
   const token = getToken();
   return axios.get(`${API_URL}/admin/getAllUsers`, {
+    headers: { 
+      Authorization: `Bearer ${token}` },
+  });
+};
+
+
+export const getBookingById = (bookingId) => {
+  const token = getToken();
+  return axios.get(`${API_URL}/user/getBookingsByUserId/${bookingId}`, {
     headers: { 
       Authorization: `Bearer ${token}` },
   });

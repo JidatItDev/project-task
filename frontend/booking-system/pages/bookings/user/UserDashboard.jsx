@@ -13,6 +13,7 @@ const UserDashboard = () => {
 
   const user = JSON.parse(localStorage.getItem("user"));
   const userId = user?.id;
+  const userEmail = user?.email || user?.userEmail || user?.user?.email || "";
 
   const handleLogout = () => {
     localStorage.removeItem("user");
@@ -23,11 +24,50 @@ const UserDashboard = () => {
     setError("");
     setLoading(true);
     try {
+      console.log("Fetching bookings for user ID:", userId); // Debug log
+      
       const res = await getUserBookings(userId);
-      setBookings(res.data);
+      
+      console.log("API Response:", res); 
+      console.log("Response data:", res.data); 
+      
+      let bookingsData = [];
+      
+      if (Array.isArray(res.data)) {
+        bookingsData = res.data;
+      } else if (res.data && Array.isArray(res.data.data)) {
+        bookingsData = res.data.data;
+      } else if (res.data && res.data.bookings && Array.isArray(res.data.bookings)) {
+        bookingsData = res.data.bookings;
+      } else if (res.data && res.data.data && Array.isArray(res.data.data.bookings)) {
+        bookingsData = res.data.data.bookings;
+      } else if (res.data && typeof res.data === 'object') {
+        if (res.data._id || res.data.id || res.data.startTime) {
+          bookingsData = [res.data];
+        } else {
+          for (const key in res.data) {
+            if (Array.isArray(res.data[key])) {
+              bookingsData = res.data[key];
+              break;
+            }
+          }
+        }
+      }
+      
+      console.log("Processed bookings data:", bookingsData); 
+      
+      if (!Array.isArray(bookingsData)) {
+        console.error("Bookings data is not an array:", bookingsData);
+        setError("Invalid data format received from server");
+        setBookings([]);
+      } else {
+        setBookings(bookingsData);
+      }
+      
     } catch (e) {
-      console.error(e);
-      setError("Failed to fetch bookings.");
+      console.error("Error fetching bookings:", e);
+      setError(e.response?.data?.message || "Failed to fetch bookings. Please try again.");
+      setBookings([]);
     } finally {
       setLoading(false);
     }
@@ -37,6 +77,7 @@ const UserDashboard = () => {
     if (!userId) return;
     fetchBookings();
   }, [userId]);
+
 
   if (!userId) {
     return (
@@ -50,7 +91,8 @@ const UserDashboard = () => {
   }
 
   const getStatusBadge = (status) => {
-    switch (status) {
+    const statusLower = (status || "").toLowerCase();
+    switch (statusLower) {
       case "accepted":  
         return (
           <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800">
@@ -64,12 +106,28 @@ const UserDashboard = () => {
           </span>
         );
       case "pending":
-      default:
         return (
           <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-yellow-100 text-yellow-800">
             Pending
           </span>
         );
+      default:
+        return (
+          <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-gray-100 text-gray-800">
+            {status || "Unknown"}
+          </span>
+        );
+    }
+  };
+
+  // Format date safely
+  const formatDate = (dateString) => {
+    if (!dateString) return "-";
+    try {
+      return new Date(dateString).toLocaleString();
+    } catch (e) {
+      console.error("Error formatting date:", dateString, e);
+      return dateString || "-";
     }
   };
 
@@ -79,8 +137,9 @@ const UserDashboard = () => {
         {/* Header with User Info and Logout */}
         <div className="flex justify-between items-center mb-6 p-4 bg-white rounded-lg shadow-md">
           <div>
-            <h1 className="text-2xl font-bold text-gray-800">Welcome, {user?.name || "User"}!</h1>
-            <p className="text-gray-600">{user?.email}</p>
+            <h1 className="text-2xl font-bold text-gray-800">Welcome, {user?.name || user?.userName || "User"}!</h1>
+            <p className="text-gray-600">{userEmail}</p>
+            <p className="text-sm text-gray-500">User ID: {userId}</p>
             <p className="text-sm text-gray-500">Role: {user?.role || "User"}</p>
           </div>
           
@@ -114,7 +173,7 @@ const UserDashboard = () => {
                 <p className="mt-2 text-gray-500">Loading bookings...</p>
               </div>
             </div>
-          ) : bookings.length === 0 ? (
+          ) : !Array.isArray(bookings) || bookings.length === 0 ? (
             <div className="text-center py-12">
               <div className="inline-block p-4 rounded-full bg-blue-50 mb-4">
                 <svg className="w-12 h-12 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -132,27 +191,40 @@ const UserDashboard = () => {
                     <th className="px-4 py-3 text-left text-gray-600 font-semibold">#</th>
                     <th className="px-4 py-3 text-left text-gray-600 font-semibold">Start Time</th>
                     <th className="px-4 py-3 text-left text-gray-600 font-semibold">End Time</th>
+                    <th className="px-4 py-3 text-left text-gray-600 font-semibold">Service</th>
                     <th className="px-4 py-3 text-left text-gray-600 font-semibold">Notes</th>
                     <th className="px-4 py-3 text-left text-gray-600 font-semibold">Status</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {bookings.map((b, index) => (
-                    <tr key={b._id} className="hover:bg-gray-50 transition-colors">
-                      <td className="px-4 py-3 text-center text-gray-600 border-t">{index + 1}</td>
-                      <td className="px-4 py-3 border-t">{new Date(b.startTime).toLocaleString()}</td>
-                      <td className="px-4 py-3 border-t">{new Date(b.endTime).toLocaleString()}</td>
-                      <td className="px-4 py-3 border-t">{b.notes || "-"}</td>
-                      <td className="px-4 py-3 border-t">{getStatusBadge(b.status)}</td>
-                    </tr>
-                  ))}
+                  {bookings.map((b, index) => {
+                    // Extract booking data safely
+                    const booking = b || {};
+                    const bookingId = booking._id || booking.id || `booking-${index}`;
+                    const serviceName = booking.serviceName || booking.service || "N/A";
+                    
+                    return (
+                      <tr key={bookingId} className="hover:bg-gray-50 transition-colors">
+                        <td className="px-4 py-3 text-center text-gray-600 border-t">{index + 1}</td>
+                        <td className="px-4 py-3 border-t">{formatDate(booking.startTime)}</td>
+                        <td className="px-4 py-3 border-t">{formatDate(booking.endTime)}</td>
+                        <td className="px-4 py-3 border-t">{serviceName}</td>
+                        <td className="px-4 py-3 border-t">{booking.notes || "-"}</td>
+                        <td className="px-4 py-3 border-t">{getStatusBadge(booking.status)}</td>
+                      </tr>
+                    );
+                  })}
                 </tbody>
               </table>
               
               {/* Summary */}
               <div className="mt-6 p-4 bg-gray-50 rounded-lg flex justify-between items-center">
                 <div>
-                  <p className="text-sm text-gray-600">Total Bookings: <span className="font-semibold">{bookings.length}</span></p>
+                  <p className="text-sm text-gray-600">
+                    Total Bookings: <span className="font-semibold">
+                      {Array.isArray(bookings) ? bookings.length : 0}
+                    </span>
+                  </p>
                   <p className="text-xs text-gray-500">Last updated: {new Date().toLocaleTimeString()}</p>
                 </div>
                 <Button 

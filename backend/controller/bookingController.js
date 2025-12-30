@@ -136,9 +136,8 @@ const getAllBookings = async (req, res) => {
 const getBookingsByUserId = async (req, res) => {
   try {
     const id = req.params.id;
-    const userId = id;
 
-    if (!userId) {
+    if (!id) {
       return res.status(400).json({
         success: false,
         message: 'User ID is required',
@@ -146,7 +145,7 @@ const getBookingsByUserId = async (req, res) => {
     }
 
     const bookings = await Booking.findAll({
-      where: { userId },
+      where: { id },
       attributes: [
         'id',
         'userId',
@@ -181,7 +180,7 @@ const getBookingsByUserId = async (req, res) => {
       email: b['user.email'],
     }));
 
-    return res.status(200).json(flattened);
+    return res.status(200).json({...flattened[0]});
   } catch (error) {
     handleError(res, error);
   }
@@ -273,6 +272,64 @@ const deleteBooking = async (req, res) => {
 
 
 
+
+const getBookingsByUserId2 = async (req, res) => {
+  try {
+    const id = req.params.id;
+
+    const userId = id;
+
+    if (!userId) {
+      return res.status(400).json({
+        success: false,
+        message: 'User ID is required',
+      });
+    }
+
+    const bookings = await Booking.findAll({
+      where: { userId },
+      attributes: [
+        'id',
+        'userId',
+        'startTime',
+        'endTime',
+        'status',
+        'notes',
+        'createdAt',
+        'updatedAt',
+      ],
+      include: [
+        {
+          model: User,
+          as: 'user',
+          attributes: ['id', 'name', 'email'],
+        },
+      ],
+      order: [['createdAt', 'DESC']],
+      raw: true,
+    });
+
+    const flattened = bookings.map(b => ({
+      id: b.id,
+      userId: b.userId,
+      startTime: b.startTime,
+      endTime: b.endTime,
+      status: b.status,
+      notes: b.notes,
+      createdAt: b.createdAt,
+      updatedAt: b.updatedAt,
+      name: b['user.name'],
+      email: b['user.email'],
+    }));
+
+    return res.status(200).json(flattened);
+  } catch (error) {
+    handleError(res, error);
+  }
+};
+
+
+
 module.exports = {
-  updateBookingStatus, getBookingsByUserId, createBooking, getAllBookings, deleteBooking
+  updateBookingStatus, getBookingsByUserId, createBooking, getAllBookings, deleteBooking, getBookingsByUserId2
 };

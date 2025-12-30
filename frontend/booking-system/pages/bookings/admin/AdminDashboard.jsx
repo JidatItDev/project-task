@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
+import io from "socket.io-client";  
 import AdminSidebar from "../../../components/layout/Sidebar";
 import { 
   Table, 
@@ -25,12 +26,12 @@ import {
   CheckCircle, 
   XCircle, 
   Clock, 
-  Users, 
-  Calendar,
-  TrendingUp
+  Calendar
 } from "lucide-react";
 
 const API_URL = "http://localhost:3001";
+
+const socket = io("http://localhost:3001");
 
 const getToken = () => {
   const user = JSON.parse(localStorage.getItem("user"));
@@ -51,6 +52,7 @@ const AdminDashboard = () => {
     rejected: 0
   });
 
+  // Fetch initial bookings when component mounts
   const fetchBookings = async () => {
     setError("");
     setLoading(true);
@@ -85,7 +87,27 @@ const AdminDashboard = () => {
   };
 
   useEffect(() => {
-    fetchBookings();
+    fetchBookings(); 
+
+    socket.on("booking-added", (newBooking) => {
+      console.log("New booking received via Socket.IO:", newBooking);
+
+      setBookings((prevBookings) => [newBooking, ...prevBookings]);
+
+      // Update stats
+      setStats((prevStats) => ({
+        ...prevStats,
+        totalBookings: prevStats.totalBookings + 1,
+        pending: newBooking.status === "pending" ? prevStats.pending + 1 : prevStats.pending,
+        accepted: newBooking.status === "accepted" ? prevStats.accepted + 1 : prevStats.accepted,
+        rejected: newBooking.status === "rejected" ? prevStats.rejected + 1 : prevStats.rejected,
+      }));
+    });
+
+    // Cleanup the socket listener when the component is unmounted
+    return () => {
+      socket.off("booking-added");
+    };
   }, []);
 
   const updateBookingStatus = async (bookingId, status) => {
@@ -263,13 +285,16 @@ const AdminDashboard = () => {
                       {bookings.map((booking) => {
                         const bookingId = booking.id ?? booking._id;
                         const userLabel = 
-                          booking.user?.name ??
+                          booking.user?.name ?? 
                           booking.user?.email ?? 
                           booking.userName ?? 
                           booking.email ?? 
                           booking.userId ?? 
                           "-";
-                        
+
+                        // Ensure userLabel is a string and safe for charAt
+                        const userInitial = typeof userLabel === 'string' && userLabel.length > 0 ? userLabel.charAt(0).toUpperCase() : '-';
+
                         const start = booking.startTime
                           ? new Date(booking.startTime).toLocaleString()
                           : "-";
@@ -284,7 +309,7 @@ const AdminDashboard = () => {
                               <div className="flex items-center gap-2">
                                 <div className="h-8 w-8 rounded-full bg-gray-200 flex items-center justify-center">
                                   <span className="text-xs font-medium">
-                                    {userLabel.charAt(0).toUpperCase()}
+                                    {userInitial}
                                   </span>
                                 </div>
                                 <span className="truncate max-w-[150px]">{userLabel}</span>

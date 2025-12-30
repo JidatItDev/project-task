@@ -1,9 +1,11 @@
 import { useState } from "react";
-import { createBooking } from "../../services/booking.service";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { X } from "lucide-react"; // Add this import
+import { X } from "lucide-react";
+import io from "socket.io-client";
+
+const socket = io("http://localhost:3001");  
 
 const CreateBookingModal = ({ onCreated }) => {
   const user = JSON.parse(localStorage.getItem("user"));
@@ -27,24 +29,28 @@ const CreateBookingModal = ({ onCreated }) => {
     setLoading(true);
 
     try {
-      await createBooking({
+      console.log("Emitting new booking:", {
+        userId: user?.id,
+        startTime,
+        endTime,
+        notes,
+      });
+      socket.emit("new-booking", {
         userId: user?.id,
         startTime,
         endTime,
         notes,
       });
 
-      // Close modal and reset
       setIsOpen(false);
       resetForm();
-      
-      // Refresh dashboard list
+
       if (onCreated) {
         await onCreated();
       }
     } catch (err) {
       console.error(err);
-      setError(err.response?.data?.message || "Failed to create booking. Please try again.");
+      setError("Failed to create booking. Please try again.");
     } finally {
       setLoading(false);
     }
